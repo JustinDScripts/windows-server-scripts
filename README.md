@@ -1,7 +1,7 @@
-- 👋 Hi, I’m @JustinDScripts
-- 👀 I’m interested in PowerShell scripts for Windows servers automation
-- 🌱 I’m currently Working on scripts for Windows servers
-- 💞️ I’m looking to collaborate on ...
+- 👋 Hi, I’m @JustinDScripts, a senior Windows server administrator working for a European IT company from Bengaluru, India.
+- 👀 I develop multiple PowerShell scripts for Windows servers automation.
+- 🌱 This is my Github public repository.
+- 💞️ I’m looking to collaborate further on this topic.
 - 📫 How to reach me : https://www.linkedin.com/in/justindeva/
 
 <!---
