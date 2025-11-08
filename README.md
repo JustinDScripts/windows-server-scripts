@@ -3,6 +3,7 @@
 - 🌱 This is my Github public repository.
 - 💞️ I’m looking to collaborate further on this topic.
 - 📫 How to reach me : https://www.linkedin.com/in/justindeva/
+- 🪟 My blog: https://justinztechies.blogspot.com/
 
 <!---
 JustinDScripts/JustinDScripts is a ✨ special ✨ repository because its `README.md` (this file) appears on your GitHub profile.
