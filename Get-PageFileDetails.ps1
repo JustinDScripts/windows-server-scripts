@@ -14,6 +14,12 @@ Get-CimInstance Win32_PageFileUsage | ForEach-Object {
     } # pscustomobject
 } # foreach-object
 } #End of function
+<#
+Sample output:
+Name            AllocatedSizeGB CurrentUsageGB PeakUsageGB
+----            --------------- -------------- -----------
+C:\pagefile.sys               8           0.42        0.43
+#>
 # Method 2 : For remote computers which might not have WinRM enabled:
 function-GetPageFileDetails_NoWinRM {
 $Computers = "PC01", "PC02"
