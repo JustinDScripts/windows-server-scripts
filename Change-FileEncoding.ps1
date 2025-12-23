@@ -1,5 +1,5 @@
 <#
-Change-Endcoding.ps1
+Change-FileEncoding.ps1
 This will convert encoding of a text file.
 Author: JustinD
 2025-11-25 | Initial | To be tested
