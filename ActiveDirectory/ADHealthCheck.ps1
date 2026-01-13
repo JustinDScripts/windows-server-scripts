@@ -1,66 +1,45 @@
-<#PSScriptInfo
- 
-.VERSION 1.0
- 
-.GUID 30c7c087-1268-4d21-8bf7-ee25c37459b0
- 
-.AUTHOR Vikas Sukhija
- 
-.COMPANYNAME TechWizard.cloud
- 
-.COPYRIGHT
- 
-.TAGS
- 
-.LICENSEURI
- 
-.PROJECTURI https://techwizard.cloud/2021/05/04/active-directory-health-check-v2/
- 
-.ICONURI
- 
-.EXTERNALMODULEDEPENDENCIES
- 
-.REQUIREDSCRIPTS
- 
-.EXTERNALSCRIPTDEPENDENCIES
- 
-.RELEASENOTES https://techwizard.cloud/2021/05/04/active-directory-health-check-v2/
- 
- 
-.PRIVATEDATA
- 
+<#
+.DESCRIPTION
+    AD Health Check Script
+.VERSION
+    2026-01-13 JustinD - Initial Version
+.NOTES
+This script will run various health checks on all Domain Controllers in the current forest and generate an HTML report.
+It checks the following for each DC:
+- Ping Status
+- Netlogon Service Status
+- NTDS Service Status
+- DNS Service Status
+- Netlogons Test
+- Replication Test
+- Services Test
+- Advertising Test
+- FSMO Check Test
+It then compiles the results into an HTML report and emails it to specified recipients.
+.LINK
+https://github.com/JustinDScripts/windows-server-scripts/blob/main/ActiveDirectory/ADHealthCheck.ps1
+.AUTHOR
+    Justin Devasahayam
+    T-Systems International GmbH
 #>
 
-<#
- 
-.DESCRIPTION
-    Date: 12/25/2014
-    AD Health Status
-    Satus: Ping,Netlogon,NTDS,DNS,DCdiag Test(Replication,sysvol,Services)
-    Update: Added Advertising
-    Update: 5/3/2021 version2 with parameters to make it more generic
- 
-#> 
 ###############################Paramters####################################
 param (
-  [string]$Smtphost = $(Read-Host "Enter SMTP Server"),
-  [string]$from = $(Read-Host "Enter From Address"),
-  [String[]]$EmailReport = $(Read-Host "Enter email Address/Addresses(seprated by comma) for report"),
+  [string]$Smtphost = 'smtp.t-systems.com',
+  [string]$from = 'no-Reply@t-systems.com',
+  [String[]]$EmailReport = 'Justin.Devasahayam@t-systems.com',
   $timeout = "60"
 )
 ###########################Define Variables##################################
 $EmailReport = $EmailReport -split ','
-$report = ".\ADReport.htm" 
-
+$report = "C:\Temp\ADReport.htm" 
 if((test-path $report) -like $false)
 {
 new-item $report -type file
 }
 #####################################Get ALL DC Servers#######################
 $getForest = [system.directoryservices.activedirectory.Forest]::GetCurrentForest()
-
 $DCServers = $getForest.domains | ForEach-Object {$_.DomainControllers} | ForEach-Object {$_.Name}
- 
 ###############################HTml Report Content############################
 Clear-Content $report 
 Add-Content $report "<html>" 
@@ -101,7 +80,6 @@ add-content $report  "<font face='tahoma' color='#003399' size='4'><strong>Activ
 add-content $report  "</td>" 
 add-content $report  "</tr>" 
 add-content $report  "</table>" 
- 
 add-content $report  "<table width='100%'>" 
 Add-Content $report  "<tr bgcolor='IndianRed'>" 
 Add-Content $report  "<td width='5%' align='center'><B>Identity</B></td>" 
@@ -114,19 +92,15 @@ Add-Content $report  "<td width='10%' align='center'><B>ReplicationTest</B></td>
 Add-Content $report  "<td width='10%' align='center'><B>ServicesTest</B></td>"
 Add-Content $report  "<td width='10%' align='center'><B>AdvertisingTest</B></td>"
 Add-Content $report  "<td width='10%' align='center'><B>FSMOCheckTest</B></td>"
- 
 Add-Content $report "</tr>" 
-
 ################Ping Test################################################################
 foreach ($DC in $DCServers){
 $Identity = $DC
                 Add-Content $report "<tr>"
 if ( Test-Connection -ComputerName $DC -Count 1 -ErrorAction SilentlyContinue ) {
 Write-Host $DC `t $DC `t Ping Success -ForegroundColor Green
- 
         Add-Content $report "<td bgcolor= 'GainsBoro' align=center> <B> $Identity</B></td>" 
                 Add-Content $report "<td bgcolor= 'Aquamarine' align=center> <B>Success</B></td>" 
-
                 ##############Netlogon Service Status################
         $serviceStatus = start-job -scriptblock {get-service -ComputerName $($args[0]) -Name "Netlogon" -ErrorAction SilentlyContinue} -ArgumentList $DC
                 wait-job $serviceStatus -timeout $timeout
@@ -338,7 +312,6 @@ Write-Host $DC `t $DC `t Ping Success -ForegroundColor Green
                   }
                 }
                ########################################################
-                
 } 
 else
               {
@@ -354,18 +327,14 @@ Write-Host $DC `t $DC `t Ping Fail -ForegroundColor Red
         Add-Content $report "<td bgcolor= 'Red' align=center> <B>Ping Fail</B></td>"
         Add-Content $report "<td bgcolor= 'Red' align=center> <B>Ping Fail</B></td>"
 }         
-       
 } 
-
 Add-Content $report "</tr>"
 ############################################Close HTMl Tables###########################
 Add-content $report  "</table>" 
 Add-Content $report "</body>" 
 Add-Content $report "</html>" 
-
 ########################################################################################
 #############################################Send Email#################################
-
 if(($Smtphost) -and ($EmailReport) -and ($from)){
 [string]$body = Get-Content $report
 Send-MailMessage -SmtpServer $Smtphost -From $from -To $EmailReport -Subject "Active Directory Health Monitor" -Body $body -BodyAsHtml
