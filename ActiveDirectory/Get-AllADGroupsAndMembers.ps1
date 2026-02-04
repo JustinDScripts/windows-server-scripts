@@ -12,30 +12,34 @@ $OutFile = Join-Path -Path  $OutputDir -ChildPath "Groups_n_Users_$((Get-Date).T
 $results = New-Object System.Collections.Generic.List[System.Object]
 
 # Get all Active Directory groups
-$groups = Get-ADGroup -Filter * -Properties Name
+$GroupName = '*'
+$GroupName = 'dc3-tsi-pool_b-veeam_restore'
+try {
+if ($GroupName -eq '*') {$groups = Get-ADGroup -Filter $GroupName -Properties Name}else {$groups = Get-ADGroup -Identity $GroupName -Properties Name}
 
 # Loop through each group
 foreach ($group in $groups) {
 write-host "Getting members of group: $($group.name)"
     # Get members of the current group (use -Recursive to include nested group members)
     $members = Get-ADGroupMember -Identity $group.Name -Recursive | Where-Object {$_.objectClass -eq 'user'} # Filter for only user objects
-
     # Loop through each member and add to the results list
     foreach ($member in $members) {
+    $MemberProps = Get-ADUser -Identity $member.SamAccountName -Properties Enabled
 #$MemberProps = Get-ADUser -filter $member -properties PasswordExpired, PasswordLastSet, PasswordNeverExpires,lastlogontimestamp,mail | 
 #sort-object PasswordLastSet | 
 #select-object Name,GivenName, SamAccountName, UserPrincipalName,Mail,Enabled,lastlogontimestamp,PasswordLastSet,PasswordExpired
         $results.Add([PSCustomObject]@{
             GroupName        = $group.Name
-            UserName         = $member.Name
-            UserSamAccountName = $member.SamAccountName
+            Member_SamAccountName = $member.SamAccountName
+            Member_Name         = $member.Name
+            Member_Enabled         = $MemberProps.Enabled
             #Enabled = $MemberProps.Enabled
             #PasswordLastSet = $MemberProps.PasswordLastSet
             #lastlogontimestamp = $MemberProps.lastlogontimestamp
         })
     }
 }
-
 # Export the results to a CSV file
 $results | Export-Csv -Path $OutFile -NoTypeInformation -Encoding UTF8
-Write-Host "Export complete. Data saved to $OutFile"
+Write-Host "Export completed. Data saved to $OutFile"
+} catch {$_.exception.message}
