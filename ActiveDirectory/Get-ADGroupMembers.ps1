@@ -1,8 +1,12 @@
 <#
-This script will get an output csv file with all the groups in the current domain and their members.
+Get-ADGroupMembers.ps1
+This script will get an output csv file with all the groups in the current domain or given group name and their members.
 Author: Justin D
-Date : 2026-06-22
+Date : 2026-06-02
 #>
+Param(
+    [STRING]$GroupName="All"
+    )
 # Initial Settings:
 Push-Location $PSScriptRoot # JD To cd scriptdir
 $OutputDir = ".\Outputs\Outputs_$((Get-Date).ToString('yyyy-MM-dd'))"
@@ -12,11 +16,10 @@ $OutFile = Join-Path -Path  $OutputDir -ChildPath "Groups_n_Users_$((Get-Date).T
 $results = New-Object System.Collections.Generic.List[System.Object]
 
 # Get all Active Directory groups
-$GroupName = '*'
-$GroupName = 'dc3-tsi-pool_b-veeam_restore'
+#$GroupName = '*'
+#$GroupName = 'dc3-tsi-pool_b-veeam_restore'
 try {
-if ($GroupName -eq '*') {$groups = Get-ADGroup -Filter $GroupName -Properties Name}else {$groups = Get-ADGroup -Identity $GroupName -Properties Name}
-
+if ($GroupName -eq 'All') {$groups = Get-ADGroup -Filter * -Properties Name}else {$groups = Get-ADGroup -Identity $GroupName -Properties Name}
 # Loop through each group
 foreach ($group in $groups) {
 write-host "Getting members of group: $($group.name)"
@@ -24,7 +27,7 @@ write-host "Getting members of group: $($group.name)"
     $members = Get-ADGroupMember -Identity $group.Name -Recursive | Where-Object {$_.objectClass -eq 'user'} # Filter for only user objects
     # Loop through each member and add to the results list
     foreach ($member in $members) {
-    $MemberProps = Get-ADUser -Identity $member.SamAccountName -Properties Enabled
+    $MemberProps = Get-ADUser -Identity $member.SamAccountName -Properties Enabled, WhenCreated, WhenChanged
 #$MemberProps = Get-ADUser -filter $member -properties PasswordExpired, PasswordLastSet, PasswordNeverExpires,lastlogontimestamp,mail | 
 #sort-object PasswordLastSet | 
 #select-object Name,GivenName, SamAccountName, UserPrincipalName,Mail,Enabled,lastlogontimestamp,PasswordLastSet,PasswordExpired
@@ -33,6 +36,8 @@ write-host "Getting members of group: $($group.name)"
             Member_SamAccountName = $member.SamAccountName
             Member_Name         = $member.Name
             Member_Enabled         = $MemberProps.Enabled
+            Member_Created         = $MemberProps.WhenCreated
+            Member_Changed        = $MemberProps.WhenChanged
             #Enabled = $MemberProps.Enabled
             #PasswordLastSet = $MemberProps.PasswordLastSet
             #lastlogontimestamp = $MemberProps.lastlogontimestamp
@@ -43,3 +48,4 @@ write-host "Getting members of group: $($group.name)"
 $results | Export-Csv -Path $OutFile -NoTypeInformation -Encoding UTF8
 Write-Host "Export completed. Data saved to $OutFile"
 } catch {$_.exception.message}
+if (test-path -path $OutFile -PathType Leaf) {invoke-item $OutFile}
