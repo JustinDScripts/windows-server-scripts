@@ -11,3 +11,6 @@ Manually installing PowerShell modules from a NuGet package:
       $env:PSModulePath is a semicolon-delimited set of paths in which PowerShell should look for modules.
 
 Ref: https://learn.microsoft.com/en-us/powershell/gallery/how-to/working-with-packages/manual-download?view=powershellget-3.x
+
+PowerCLI module installation:
+https://learn.microsoft.com/en-us/powershell/gallery/how-to/working-with-packages/manual-download?view=powershellget-3.x
