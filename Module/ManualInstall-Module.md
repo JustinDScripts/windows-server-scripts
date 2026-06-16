@@ -14,3 +14,4 @@ Ref: https://learn.microsoft.com/en-us/powershell/gallery/how-to/working-with-pa
 
 PowerCLI module installation:
 https://learn.microsoft.com/en-us/powershell/gallery/how-to/working-with-packages/manual-download?view=powershellget-3.x
+https://developer.broadcom.com/tools/vmware-powercli/latest/
