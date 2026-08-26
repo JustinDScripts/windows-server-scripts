@@ -5,4 +5,5 @@ $proxy.Credentials = [System.Net.CredentialCache]::DefaultCredentials # DefaultC
 [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
 
 # Install-Module VMware.PowerCLI -Scope CurrentUser -Force -AllowClobber  # This may give error 
-Install-Module VMware.PowerCLI -Scope CurrentUser -Force -AllowClobber -SkipPublisherCheck
+#Install-Module VMware.PowerCLI -Scope CurrentUser -Force -AllowClobber -SkipPublisherCheck # for current user only
+Install-Module VMware.PowerCLI -Scope AllUsers -Force -AllowClobber -SkipPublisherCheck # for all users
